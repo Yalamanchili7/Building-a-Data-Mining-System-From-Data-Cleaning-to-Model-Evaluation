@@ -1,5 +1,5 @@
 # Building-a-Data-Mining-System-From-Data-Cleaning-to-Model-Evaluation
-In this project i planed and writeen code for a data mining project, implementing the full CRISP-DM cycle. Implemented a variant for performing the Model training and cross validation process.
+In this project I planned and written code for a data mining project, implementing the full CRISP-DM cycle. Implemented a variant for performing the Model training and cross validation process.
 To begin, here are the steps you can follow to implement the full CRISP-DM cycle for your data mining project:
 
 Business Understanding: Define the problem you are trying to solve, the goals you hope to achieve, and the stakeholders involved in the project.
