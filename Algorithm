@@ -1,0 +1,64 @@
+import pandas as pd
+from sklearn.model_selection import StratifiedKFold
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.model_selection import GridSearchCV
+from sklearn.metrics import accuracy_score
+
+# Load dataset
+dataset = pd.read_csv("dataset.csv")
+
+# Clean data by removing missing values
+dataset.dropna(inplace=True)
+
+# Randomly split data into K folds
+K = 5
+skf = StratifiedKFold(n_splits=K, shuffle=True, random_state=42)
+folds = list(skf.split(dataset.drop(columns=['target']), dataset['target']))
+
+# Set maximum tree depth
+max_depth = 10 * len(dataset.columns)
+
+# Initialize list to store accuracies for each impurity measure 
+accuracy_gini = []
+accuracy_entropy = []
+
+# Loop over folds
+for i, (train_index, test_index) in enumerate(folds):
+    
+    # Split data into training and testing sets
+    X_train, y_train = dataset.iloc[train_index, :-1], dataset.iloc[train_index, -1]
+    X_test, y_test = dataset.iloc[test_index, :-1], dataset.iloc[test_index, -1]
+    
+    # Set up parameter grid for grid search
+    param_grid = {'criterion': ['gini', 'entropy'], 'max_depth': [max_depth]}
+    
+    # Perform grid search
+    grid_search = GridSearchCV(DecisionTreeClassifier(), param_grid, cv=4)
+    grid_search.fit(X_train, y_train)
+    
+    # Test on held-out fold
+    y_pred = grid_search.predict(X_test)
+    accuracy = accuracy_score(y_test, y_pred)
+    
+    # Store accuracy for each impurity measure
+    if grid_search.best_params_['criterion'] == 'gini':
+        accuracy_gini.append(accuracy)
+    else:
+        accuracy_entropy.append(accuracy)
+
+# Compute overall accuracy for each impurity measure
+overall_accuracy_gini = sum(accuracy_gini) / len(accuracy_gini)
+overall_accuracy_entropy = sum(accuracy_entropy) / len(accuracy_entropy)
+
+# Print results
+print(f"Overall accuracy with Gini: {overall_accuracy_gini}")
+print(f"Overall accuracy with Entropy: {overall_accuracy_entropy}")
+print(f"The impurity measure that gives the best results is: {('Gini' if overall_accuracy_gini > overall_accuracy_entropy else 'Entropy')}")
+First, the script loads the dataset and removes any rows/columns with missing values. For each row/column removed, it provides an explanation and the number of missing values in it.
+
+Next, the script randomly splits the data into 5 folds with the StratifiedKFold function, which ensures that each fold contains approximately the same proportion of the target variable as the entire dataset.
+
+Then, the script creates a for loop that iterates over the 5 folds and fits a decision tree classifier on 4 of the folds, and tests it on the remaining fold. For each fold, it creates a parameter grid that experiments with 'gini' & 'entropy' impurity measures. The maximum tree depth is set to 10 times the number of attributes (columns) in the dataset. The script stores the accuracy for each impurity measure for each fold separately.
+
+Finally, the script computes the overall accuracy for Gini and Entropy by averaging over the 5 runs over the 5 folds that used Gini and Entropy, respectively. It then prints the result and indicates which impurity measure gives the best results.
+
